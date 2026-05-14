@@ -64,3 +64,61 @@ cat("Dimensions of Points matrix:", dim(Points), "\n")
 ```
 
 ---
+
+
+
+
+## 3. Data Wrangling
+
+We convert the raw matrices into a tidy data frame and calculate two key efficiency
+metrics:
+
+- **Points Per Minute (PPM)** — how many points a player scores per minute on court
+- **Field Goal Percentage (FG%)** — proportion of shot attempts that are successful
+
+```{r wrangle_data}
+# Convert matrices to tidy data frames
+points_df <- as.data.frame(Points) |>
+  rownames_to_column("player") |>
+  pivot_longer(-player, names_to = "season", values_to = "points")
+
+minutes_df <- as.data.frame(MinutesPlayed) |>
+  rownames_to_column("player") |>
+  pivot_longer(-player, names_to = "season", values_to = "minutes")
+
+fg_df <- as.data.frame(FieldGoals) |>
+  rownames_to_column("player") |>
+  pivot_longer(-player, names_to = "season", values_to = "fg_made")
+
+fga_df <- as.data.frame(FieldGoalAttempts) |>
+  rownames_to_column("player") |>
+  pivot_longer(-player, names_to = "season", values_to = "fg_attempts")
+
+games_df <- as.data.frame(Games) |>
+  rownames_to_column("player") |>
+  pivot_longer(-player, names_to = "season", values_to = "games")
+
+# Join all into one master data frame
+nba_df <- points_df |>
+  left_join(minutes_df,  by = c("player", "season")) |>
+  left_join(fg_df,       by = c("player", "season")) |>
+  left_join(fga_df,      by = c("player", "season")) |>
+  left_join(games_df,    by = c("player", "season")) |>
+  mutate(
+    season        = as.integer(season),
+    # Points per minute — exclude seasons with 0 minutes (injury/no play)
+    ppm           = ifelse(minutes > 0, round(points / minutes, 4), NA),
+    # Field goal percentage
+    fg_pct        = ifelse(fg_attempts > 0, round(fg_made / fg_attempts * 100, 2), NA),
+    # Points per game
+    ppg           = ifelse(games > 0, round(points / games, 2), NA),
+    # Clean player names for display
+    player_clean  = str_replace_all(player, "([A-Z])", " \\1") |> str_trim()
+  )
+
+# Preview the cleaned data
+head(nba_df, 10) |>
+  select(player_clean, season, points, minutes, ppm, fg_pct, ppg) |>
+  kable(caption = "Sample of cleaned NBA data", col.names = c("Player","Season","Points","Minutes","Pts/Min","FG%","Pts/Game"))
+```
+
