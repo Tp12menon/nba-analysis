@@ -161,3 +161,181 @@ ggplot(career_ppm, aes(x = reorder(player_clean, avg_ppm), y = avg_ppm, fill = a
   )
 ```
 
+> **Key finding:** LeBron James and Dwyane Wade consistently delivered the most points
+> per minute, making them the most efficient scorers relative to court time.
+
+---
+
+### 4.2 Career Field Goal Percentage
+
+Who was the most accurate shooter over their career?
+
+```{r fg_pct_career_bar}
+# Career average FG%
+career_fg <- nba_df |>
+  filter(!is.na(fg_pct)) |>
+  group_by(player_clean) |>
+  summarise(avg_fg_pct = mean(fg_pct), .groups = "drop") |>
+  arrange(desc(avg_fg_pct))
+
+# Bar chart
+ggplot(career_fg, aes(x = reorder(player_clean, avg_fg_pct), y = avg_fg_pct, fill = avg_fg_pct)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = paste0(round(avg_fg_pct, 1), "%")), hjust = -0.15, size = 3.5) +
+  coord_flip() +
+  scale_fill_gradient(low = "#85c1e9", high = "#1a5276", guide = "none") +
+  scale_y_continuous(limits = c(0, 70)) +
+  labs(
+    title    = "Career Average Field Goal Percentage (2005–2014)",
+    subtitle = "Higher = more accurate shooter",
+    x        = NULL,
+    y        = "Field Goal Percentage (%)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title    = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(colour = "grey50"),
+    panel.grid.major.y = element_blank()
+  )
+```
+
+> **Key finding:** Dwight Howard leads in shooting accuracy — consistent with his role
+> as a centre who takes high-percentage shots close to the basket. Guards like Kobe Bryant
+> and Joe Johnson attempt more difficult shots, resulting in lower accuracy.
+
+---
+
+## 5. Efficiency Trends Over Time
+
+### 5.1 Points Per Minute by Season
+
+How did each player's scoring efficiency evolve across the decade?
+
+```{r ppm_line_plot}
+ggplot(nba_df |> filter(!is.na(ppm)),
+       aes(x = season, y = ppm, colour = player_clean)) +
+  geom_line(linewidth = 0.8, alpha = 0.85) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = 2005:2014) +
+  scale_colour_brewer(palette = "Paired") +
+  labs(
+    title    = "Points Per Minute by Season (2005–2014)",
+    subtitle = "Dips often reflect injuries or limited game time",
+    x        = "Season",
+    y        = "Points Per Minute",
+    colour   = "Player"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title    = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(colour = "grey50"),
+    legend.position = "right"
+  )
+```
+
+> **Note:** Derrick Rose's 2012 season shows as missing — he did not play that season
+> due to injury. Kevin Durant's sharp rise from 2007 onwards reflects his rapid
+> development into one of the league's elite scorers.
+
+---
+
+### 5.2 Field Goal % Trend Over Time
+
+```{r fg_pct_line}
+ggplot(nba_df |> filter(!is.na(fg_pct)),
+       aes(x = season, y = fg_pct, colour = player_clean)) +
+  geom_line(linewidth = 0.8, alpha = 0.85) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = 2005:2014) +
+  scale_colour_brewer(palette = "Paired") +
+  labs(
+    title    = "Field Goal Percentage by Season (2005–2014)",
+    subtitle = "Tracking shooting accuracy across the decade",
+    x        = "Season",
+    y        = "Field Goal Percentage (%)",
+    colour   = "Player"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title    = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(colour = "grey50"),
+    legend.position = "right"
+  )
+```
+
+---
+
+## 6. Peak Season Performance
+
+Which player had the single best scoring season in the dataset?
+
+```{r peak_season}
+# Top 10 individual season performances by PPM
+top_seasons <- nba_df |>
+  filter(!is.na(ppm), minutes >= 500) |>   # filter out injury seasons with few mins
+  arrange(desc(ppm)) |>
+  slice_head(n = 10) |>
+  select(player_clean, season, points, minutes, ppm, fg_pct, ppg)
+
+kable(
+  top_seasons,
+  caption   = "Top 10 Single-Season Performances by Points Per Minute",
+  col.names = c("Player", "Season", "Points", "Minutes", "Pts/Min", "FG%", "Pts/Game"),
+  digits    = 3
+)
+```
+
+---
+
+## 7. Summary
+
+```{r summary_table}
+# Full career summary table
+career_summary <- nba_df |>
+  filter(!is.na(ppm), minutes > 0) |>
+  group_by(player_clean) |>
+  summarise(
+    total_points   = sum(points),
+    total_minutes  = sum(minutes),
+    career_ppm     = round(mean(ppm, na.rm = TRUE), 3),
+    career_fg_pct  = round(mean(fg_pct, na.rm = TRUE), 1),
+    career_ppg     = round(mean(ppg, na.rm = TRUE), 1),
+    seasons_played = n(),
+    .groups = "drop"
+  ) |>
+  arrange(desc(career_ppm))
+
+kable(
+  career_summary,
+  caption   = "Career Efficiency Summary (2005–2014)",
+  col.names = c("Player", "Total Points", "Total Minutes",
+                "Pts/Min", "FG%", "Pts/Game", "Seasons")
+)
+```
+
+---
+
+## 8. Conclusions
+
+- **LeBron James** emerges as the most consistently efficient scorer across the decade,
+  combining high points-per-minute with strong field goal accuracy.
+
+- **Dwight Howard** leads in shooting accuracy but scores fewer points overall due to
+  his role as a centre focused on defence and rebounds.
+
+- **Kevin Durant's** trajectory is striking — a steep improvement from 2007 onwards
+  as he developed into one of the most prolific scorers in the league.
+
+- **Derrick Rose's** career illustrates the impact of injury on performance data —
+  careful filtering of near-zero minute seasons is essential for fair comparison.
+
+---
+
+## 9. Session Info
+
+```{r session_info}
+sessionInfo()
+```
+
+---
+
