@@ -122,3 +122,42 @@ head(nba_df, 10) |>
   kable(caption = "Sample of cleaned NBA data", col.names = c("Player","Season","Points","Minutes","Pts/Min","FG%","Pts/Game"))
 ```
 
+
+
+---
+
+## 4. Overall Career Efficiency
+
+### 4.1 Average Points Per Minute (Career)
+
+Which player made the most of their time on court across all 10 seasons?
+
+```{r ppm_career_bar}
+# Calculate career average PPM (excluding injury seasons with 0 minutes)
+career_ppm <- nba_df |>
+  filter(!is.na(ppm)) |>
+  group_by(player_clean) |>
+  summarise(avg_ppm = mean(ppm), .groups = "drop") |>
+  arrange(desc(avg_ppm))
+
+# Bar chart
+ggplot(career_ppm, aes(x = reorder(player_clean, avg_ppm), y = avg_ppm, fill = avg_ppm)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = round(avg_ppm, 3)), hjust = -0.15, size = 3.5) +
+  coord_flip() +
+  scale_fill_gradient(low = "#f4a460", high = "#c0392b", guide = "none") +
+  scale_y_continuous(limits = c(0, 1.1)) +
+  labs(
+    title    = "Career Average Points Per Minute (2005–2014)",
+    subtitle = "Higher = more efficient scorer per minute on court",
+    x        = NULL,
+    y        = "Points Per Minute"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title    = element_text(face = "bold", size = 15),
+    plot.subtitle = element_text(colour = "grey50"),
+    panel.grid.major.y = element_blank()
+  )
+```
+
