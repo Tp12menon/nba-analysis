@@ -3,6 +3,7 @@ title: "NBA Analysis - Player Efficiency Analysis"
 author: "Tarun"
 date: "2026-05-14"
 output: html_document
+code_folding: hide
 ---
 
 
