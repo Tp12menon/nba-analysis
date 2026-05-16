@@ -2,7 +2,12 @@
 title: "NBA Analysis - Player Efficiency Analysis"
 author: "Tarun"
 date: "2026-05-14"
-output: html_document
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
 
@@ -46,15 +51,15 @@ We begin by sourcing the basketball dataset, which contains six matrices coverin
 salary, games played, minutes played, field goals, field goal attempts, and points.
 
 ```{r}
-file.exists("data/basketball_data.R")
+# Source the data file — make sure basketball_data.R is in your /data folder
+source("../data/basketball_data.R")
 
 ```
 
 
 ```{r load_data}
 
-# Source the data file — make sure basketball_data.R is in your /data folder
-source("data/basketball_data.R")
+
 
 
 # Quick check — confirm all matrices are loaded

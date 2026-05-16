@@ -2,37 +2,31 @@
 title: "Project 2 - Salary vs Performance Analysis"
 author: "Tarun"
 date: "2026-05-14"
-output: html_document
----
-
-
----
-title: "NBA Salary vs Performance Analysis (2005–2014)"
-author: "Your Name"
-date: "`r Sys.Date()`"
 output:
   html_document:
     theme: flatly
     toc: true
     toc_float: true
-    code_folding: show
+    code_folding: hide
 ---
 
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
-                      fig.width = 10, fig.height = 6)
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 10,
+  fig.height = 6
+)
+
 library(tidyverse)
 library(ggplot2)
 library(knitr)
 ```
 
-```{r}
-getwd()
-```
-
-
 ```{r load_data}
-source("data/basketball_data.R")
+source("../data/basketball_data.R")
 ```
 
 ```{r wrangle}
