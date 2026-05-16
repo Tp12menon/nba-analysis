@@ -2,12 +2,17 @@
 title: "NBA Analysis - Player Efficiency Analysis"
 author: "Tarun"
 date: "2026-05-14"
+<<<<<<< HEAD
 output:
   html_document:
     theme: flatly
     toc: true
     toc_float: true
     code_folding: hide
+=======
+output: html_document
+code_folding: hide
+>>>>>>> 984b8cfda60966f9db6755fbb8fe12de57d26a4b
 ---
 
 
